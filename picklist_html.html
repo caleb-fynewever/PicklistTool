@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>KnightKrawler Picklist · 2052</title>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<style>
+  :root{
+    --bg0:#08080f;--bg1:#0f0f1a;--bg2:#16162a;--bg3:#1e1e35;
+    --border:#ffffff14;--border2:#ffffff22;--border3:#ffffff33;
+    --text:#e2e8f0;--text2:#94a3b8;--text3:#475569;
+    --red:#C8102E;--gold:#FFC72C;
+    --radius:14px;--radius-sm:9px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body,#root{min-height:100vh;background:var(--bg0);color:var(--text);font-family:'Inter',system-ui,sans-serif;font-size:14px}
+  ::-webkit-scrollbar{width:4px;height:4px}
+  ::-webkit-scrollbar-track{background:transparent}
+  ::-webkit-scrollbar-thumb{background:#333;border-radius:4px}
+  input[type=file]{display:none}
+  .btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--radius-sm);border:1px solid var(--border2);background:var(--bg2);color:var(--text);font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;white-space:nowrap}
+  .btn:hover{background:var(--bg3);border-color:var(--border3)}
+  .btn-red{background:var(--red);border-color:var(--red);color:#fff}
+  .btn-red:hover{background:#e01231}
+  .btn-gold{background:var(--gold);border-color:var(--gold);color:#0a0a0f;font-weight:700}
+  .btn-gold:hover{background:#ffd24f}
+  .btn-sm{padding:5px 10px;font-size:12px;border-radius:7px}
+  .btn-icon{width:30px;height:30px;padding:0;justify-content:center;border-radius:7px}
+  .surface{background:var(--bg1);border:1px solid var(--border);border-radius:var(--radius)}
+  .surface2{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm)}
+  input[type=text],input[type=search],textarea,select{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:7px 11px;color:var(--text);font-size:13px;outline:none;transition:border-color .15s;font-family:inherit}
+  input[type=text]:focus,input[type=search]:focus,textarea:focus{border-color:var(--border3)}
+  textarea{resize:vertical;min-height:70px;line-height:1.5}
+  select option{background:var(--bg2)}
+  .tcard{display:flex;align-items:center;gap:9px;padding:9px 11px;border-radius:10px;background:var(--bg2);border:1px solid var(--border);cursor:grab;transition:all .13s;user-select:none}
+  .tcard:hover{background:var(--bg3);border-color:var(--border2);transform:translateY(-1px)}
+  .tcard.dragging{opacity:.3}
+  .tcard.dover{outline:2px dashed var(--gold);outline-offset:-2px}
+  .ttile{display:flex;flex-direction:column;align-items:center;gap:5px;padding:12px 8px;border-radius:10px;background:var(--bg2);border:1px solid var(--border);cursor:grab;transition:all .13s;user-select:none;text-align:center}
+  .ttile:hover{background:var(--bg3);border-color:var(--border2);transform:translateY(-1px)}
+  .ttile.dragging{opacity:.3}
+  .ttile.dover{outline:2px dashed var(--gold);outline-offset:-2px}
+  .tier-lane{border-radius:var(--radius);border:1px solid;padding:14px;transition:all .15s;min-height:90px}
+  .tier-lane.dzone{border-color:var(--gold)!important;background:rgba(255,199,44,.04)!important}
+  .tabs{display:flex;gap:4px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius-sm);padding:3px}
+  .tab-btn{padding:6px 16px;border-radius:7px;border:none;background:transparent;color:var(--text2);font-size:13px;font-weight:500;cursor:pointer;transition:all .15s}
+  .tab-btn.active{background:var(--red);color:#fff}
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px}
+  .modal-box{background:var(--bg1);border:1px solid var(--border2);border-radius:20px;padding:28px;width:100%;max-width:500px;max-height:88vh;overflow-y:auto}
+  .divider{height:1px;background:var(--border);margin:14px 0}
+  .muted{color:var(--text2)}
+  .hint{color:var(--text3);font-size:12px}
+  .mono{font-family:monospace}
+  .outlier-badge{background:rgba(248,113,113,.15);color:#fca5a5;border:1px solid rgba(248,113,113,.3);border-radius:5px;font-size:11px;padding:2px 7px;font-weight:600}
+  .stat-chip{background:rgba(255,255,255,.07);border-radius:5px;padding:2px 7px;font-size:11px;color:var(--text2);font-family:monospace;white-space:nowrap}
+  .import-card{border:1px dashed var(--border2);border-radius:var(--radius);padding:16px 18px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:all .15s;background:var(--bg1)}
+  .import-card:hover{border-color:var(--border3);background:var(--bg2)}
+  .import-card.done{border-color:#4ade8066;border-style:solid}
+  .section-label{font-size:11px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--text3);margin-bottom:8px}
+  .note-dot{width:7px;height:7px;border-radius:50%;background:var(--gold);flex-shrink:0}
+  /* team number badge */
+  .team-num-badge{display:inline-flex;align-items:center;justify-content:center;padding:1px 7px;border-radius:6px;font-weight:700;font-size:13px;min-width:46px}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const {useState,useRef,useEffect}=React;
+
+const TIERS=["Tier 1","Tier 2","Tier 3","Do Not Pick","Uncategorized"];
+const RANKED_TIERS=["Tier 1","Tier 2","Tier 3","Do Not Pick"]; // excludes Uncategorized from analysis
+const TMETA={
+  "Tier 1":    {color:"#a78bfa",bg:"rgba(167,139,250,.08)",letter:"T1",score:1},
+  "Tier 2":    {color:"#60a5fa",bg:"rgba(96,165,250,.08)", letter:"T2",score:2},
+  "Tier 3":    {color:"#34d399",bg:"rgba(52,211,153,.08)", letter:"T3",score:3},
+  "Do Not Pick":{color:"#f87171",bg:"rgba(248,113,113,.08)",letter:"✕",score:4},
+  "Uncategorized":{color:"#64748b",bg:"rgba(100,116,139,.06)",letter:"?",score:null},
+};
+
+/* ── CSV helpers ── */
+function parseLine(line){
+  const vals=[];let cur="";let inQ=false;
+  for(let i=0;i<line.length;i++){
+    const c=line[i];
+    if(c==='"'){inQ=!inQ;}else if(c===","&&!inQ){vals.push(cur.trim());cur="";}else cur+=c;
+  }
+  vals.push(cur.trim());
+  return vals;
+}
+function csvToRows(text){
+  const nl=text.includes("\r\n")?"\r\n":"\n";
+  const lines=text.trim().split(nl).filter(l=>l.trim());
+  if(lines.length<2) return{headers:[],rows:[]};
+  const headers=parseLine(lines[0]).map(h=>h.replace(/^"|"$/g,"").trim());
+  const rows=lines.slice(1).map(l=>{
+    const vals=parseLine(l);
+    const obj={};
+    headers.forEach((h,i)=>obj[h]=(vals[i]||"").replace(/^"|"$/g,"").trim());
+    return obj;
+  });
+  return{headers,rows};
+}
+function parseTeamsCSV(text){
+  const{rows}=csvToRows(text);
+  return rows.filter(r=>r.team_number).map(r=>({
+    num:String(r.team_number),nick:r.team_name||"",city:r.city||"",
+    state:r.state_prov||"",country:r.country||"",robotImg:r.robot_image_url||"",
+    opr:0,auto:0,teleop:0,endgame:0,oprData:{},color:null,note:"",
+  }));
+}
+function parseOPRcsv(text){
+  const{rows}=csvToRows(text);
+  const map={};
+  rows.filter(r=>r.team_number).forEach(r=>{
+    const g=k=>parseFloat(r[k])||0;
+    map[String(r.team_number)]={
+      opr:g("OPR"),auto:g("totalAutoPoints"),teleop:g("totalTeleopPoints"),
+      endgame:g("endGameTowerPoints"),totalPoints:g("totalPoints"),
+      autoFuel:g("Hub Auto Fuel Count"),teleopFuel:g("Hub Teleop Fuel Count"),
+      endgameFuel:g("Hub Endgame Fuel Count"),totalFuel:g("Hub Total Fuel Count"),
+      totalTower:g("totalTowerPoints"),foulPoints:g("foulPoints"),rp:g("rp"),raw:r,
+    };
+  });
+  return map;
+}
+
+/* ── colors ── */
+function fallbackColor(num){const n=parseInt(num)||0;return`hsl(${(n*67+30)%360},65%,58%)`;}
+function hexToRgb(hex){
+  const r=/^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return r?{r:parseInt(r[1],16),g:parseInt(r[2],16),b:parseInt(r[3],16)}:null;
+}
+function colorBrightness(hex){
+  const c=hexToRgb(hex);
+  if(!c) return 128;
+  return(c.r*299+c.g*587+c.b*114)/1000;
+}
+// returns {bg, text} ensuring readable contrast
+function teamColorStyle(rawColor){
+  const col=rawColor||null;
+  if(!col) return{bg:"rgba(100,116,139,.18)",text:"#94a3b8"};
+  const brightness=colorBrightness(col);
+  // use color as bg tint, pick white or dark text
+  const rgb=hexToRgb(col);
+  if(!rgb) return{bg:"rgba(100,116,139,.18)",text:"#94a3b8"};
+  const bg=`rgba(${rgb.r},${rgb.g},${rgb.b},0.18)`;
+  const text=brightness>140?`hsl(${(parseInt(col.replace("#",""),16)%360)},70%,30%)`:col;
+  return{bg,text:col};
+}
+
+const colorCache={};
+async function getTeamColor(num){
+  if(colorCache[num]!==undefined) return colorCache[num];
+  try{
+    const r=await fetch(`https://frc-colors.com/api/v1/team/${num}`,{signal:AbortSignal.timeout(3000)});
+    if(!r.ok) throw 0;
+    const d=await r.json();
+    const c=d.primaryHex||d.colors?.[0]||null;
+    colorCache[num]=c;return c;
+  }catch{colorCache[num]=null;return null;}
+}
+
+/* ── sort ── */
+function sortTeams(arr,sortBy,dir){
+  const d=dir==="asc"?1:-1;
+  return[...arr].sort((a,b)=>{
+    if(sortBy==="num") return(parseInt(a.num)-parseInt(b.num))*d;
+    if(sortBy==="opr") return(a.opr-b.opr)*d;
+    if(sortBy==="auto") return(a.auto-b.auto)*d;
+    if(sortBy==="teleop") return(a.teleop-b.teleop)*d;
+    if(sortBy==="endgame") return(a.endgame-b.endgame)*d;
+    if(sortBy==="nick") return a.nick.localeCompare(b.nick)*d;
+    return 0;
+  });
+}
+
+/* ── TeamNumBadge ── */
+function TeamNumBadge({num,color,style={}}){
+  const raw=color||null;
+  const rgb=raw?hexToRgb(raw):null;
+  const bg=rgb?`rgba(${rgb.r},${rgb.g},${rgb.b},0.18)`:"rgba(100,116,139,.18)";
+  const text=raw||"#94a3b8";
+  return(
+    <span className="team-num-badge" style={{background:bg,color:text,...style}}>{num}</span>
+  );
+}
+
+/* ── TeamCard ── */
+function TeamCard({t,view,onDS,onDO,onDrop,onDE,onClick,isDragging,isDOver}){
+  const cls=view==="tile"?"ttile":"tcard";
+  const extra=(isDragging?" dragging":"")+(isDOver?" dover":"");
+  const col=t.color||fallbackColor(t.num);
+  const rgb=hexToRgb(col);
+  const tileBg=rgb?`rgba(${rgb.r},${rgb.g},${rgb.b},0.12)`:"rgba(100,116,139,.12)";
+  if(view==="tile") return(
+    <div className={cls+extra} draggable
+      onDragStart={onDS} onDragOver={e=>{e.preventDefault();e.stopPropagation();onDO();}}
+      onDrop={e=>{e.preventDefault();e.stopPropagation();onDrop();}} onDragEnd={onDE}
+      onClick={onClick} style={{borderTop:`3px solid ${col}`}}>
+      <TeamNumBadge num={t.num} color={t.color||fallbackColor(t.num)}/>
+      <div style={{fontSize:10,color:"var(--text3)",maxWidth:100,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{t.nick||"—"}</div>
+      {t.opr>0&&<div className="stat-chip">{t.opr.toFixed(1)}</div>}
+      {t.note&&<div className="note-dot" title={t.note}/>}
+    </div>
+  );
+  return(
+    <div className={cls+extra} draggable
+      onDragStart={onDS} onDragOver={e=>{e.preventDefault();e.stopPropagation();onDO();}}
+      onDrop={e=>{e.preventDefault();e.stopPropagation();onDrop();}} onDragEnd={onDE}
+      onClick={onClick}>
+      <span style={{color:"var(--text3)",fontSize:16,cursor:"grab"}}>⠿</span>
+      <TeamNumBadge num={t.num} color={t.color||fallbackColor(t.num)}/>
+      <span style={{flex:1,color:"var(--text2)",fontSize:12,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{t.nick||"Unknown"}</span>
+      {t.note&&<div className="note-dot" title={t.note}/>}
+      {t.opr>0&&<span className="stat-chip">OPR {t.opr.toFixed(1)}</span>}
+      {t.auto>0&&<span className="stat-chip">Auto {t.auto.toFixed(1)}</span>}
+      {t.teleop>0&&<span className="stat-chip">TP {t.teleop.toFixed(1)}</span>}
+    </div>
+  );
+}
+
+/* ── TierLane ── */
+function TierLane({tier,teams,view,isDropZone,onZDO,onZDrop,onZDL,onDS,onDO,onDrop,onDE,draggingNum,doverNum,onTeamClick}){
+  const m=TMETA[tier];
+  return(
+    <div style={{marginBottom:14}}>
+      <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:8}}>
+        <div style={{width:26,height:26,borderRadius:8,background:m.color+"22",border:`1px solid ${m.color}55`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:11,fontWeight:700,color:m.color,flexShrink:0}}>{m.letter}</div>
+        <span style={{fontWeight:600,fontSize:14,color:m.color}}>{tier}</span>
+        <span className="hint" style={{marginLeft:"auto"}}>{teams.length} team{teams.length!==1?"s":""}</span>
+      </div>
+      <div className={`tier-lane${isDropZone?" dzone":""}`}
+        style={{background:m.bg,borderColor:isDropZone?"var(--gold)":m.color+"33"}}
+        onDragOver={e=>{e.preventDefault();onZDO(tier);}}
+        onDrop={e=>{e.preventDefault();onZDrop(tier);}}
+        onDragLeave={onZDL}>
+        {teams.length===0&&<div className="hint" style={{textAlign:"center",padding:"14px 0"}}>Drop teams here</div>}
+        <div style={view==="tile"?{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(110px,1fr))",gap:7}:{display:"flex",flexDirection:"column",gap:6}}>
+          {teams.map(t=>(
+            <TeamCard key={t.num} t={t} view={view}
+              isDragging={draggingNum===t.num} isDOver={doverNum===t.num}
+              onDS={e=>onDS(e,t.num,tier)} onDO={()=>onDO(t.num)}
+              onDrop={()=>onDrop(tier,t.num)} onDE={onDE}
+              onClick={()=>onTeamClick(t)}/>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── Team Modal ── */
+function TeamModal({t,onClose,onSaveNote}){
+  const col=t.color||fallbackColor(t.num);
+  const[note,setNote]=useState(t.note||"");
+  const oprFields=[["OPR",t.opr],["Auto Points",t.auto],["Teleop Points",t.teleop],["Endgame Tower",t.endgame]].filter(s=>s[1]>0);
+  const extraFields=t.oprData?.raw?Object.entries(t.oprData.raw).filter(([k])=>k!=="team_number"&&t.oprData.raw[k]!==""):[];
+  return(
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-box" onClick={e=>e.stopPropagation()}>
+        <div style={{display:"flex",alignItems:"flex-start",gap:14,marginBottom:18}}>
+          {t.robotImg&&<img src={t.robotImg} alt="robot" style={{width:70,height:70,borderRadius:10,objectFit:"cover",border:"1px solid var(--border2)",flexShrink:0}} onError={e=>e.target.style.display="none"}/>}
+          <div style={{flex:1,minWidth:0}}>
+            <TeamNumBadge num={t.num} color={t.color||fallbackColor(t.num)} style={{fontSize:18,padding:"3px 10px",marginBottom:4}}/>
+            <div style={{fontWeight:600,fontSize:15,marginBottom:2}}>{t.nick||"Unknown Team"}</div>
+            {(t.city||t.state||t.country)&&<div className="hint">{[t.city,t.state,t.country].filter(Boolean).join(", ")}</div>}
+          </div>
+          <button className="btn btn-sm btn-icon" onClick={onClose}>✕</button>
+        </div>
+
+        {/* Notes */}
+        <div className="section-label">Scout notes</div>
+        <textarea value={note} onChange={e=>setNote(e.target.value)} placeholder="e.g. Strong defender, effective driver, consistent auto…" style={{width:"100%",marginBottom:8}}/>
+        <button className="btn btn-sm btn-gold" style={{marginBottom:14}} onClick={()=>{onSaveNote(t.num,note);onClose();}}>Save note</button>
+
+        {oprFields.length>0&&<>
+          <div className="divider"/>
+          <div className="section-label">Component OPRs</div>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:14}}>
+            {oprFields.map(([k,v])=>(
+              <div key={k} className="surface2" style={{padding:"10px 14px"}}>
+                <div className="hint" style={{marginBottom:2}}>{k}</div>
+                <div style={{fontSize:20,fontWeight:700,color:"var(--gold)"}}>{v.toFixed(2)}</div>
+              </div>
+            ))}
+          </div>
+        </>}
+
+        {extraFields.length>0&&<>
+          <div className="divider"/>
+          <div className="section-label">Full OPR breakdown</div>
+          <div style={{display:"flex",flexDirection:"column",gap:3,maxHeight:200,overflowY:"auto"}}>
+            {extraFields.map(([k,v])=>(
+              <div key={k} style={{display:"flex",justifyContent:"space-between",gap:12,fontSize:12,padding:"3px 0",borderBottom:"1px solid var(--border)"}}>
+                <span style={{color:"var(--text2)"}}>{k}</span>
+                <span className="mono">{v}</span>
+              </div>
+            ))}
+          </div>
+        </>}
+        <div className="divider"/>
+        <a href={`https://www.thebluealliance.com/team/${t.num}`} target="_blank" rel="noreferrer"
+          style={{color:"var(--red)",fontSize:13,textDecoration:"none"}}>View on The Blue Alliance ↗</a>
+      </div>
+    </div>
+  );
+}
+
+/* ── Import File Card ── */
+function ImportFileCard({label,description,accept,onLoad,loaded,filename}){
+  const ref=useRef();
+  return(
+    <div className={`import-card${loaded?" done":""}`} onClick={()=>ref.current.click()}>
+      <input type="file" ref={ref} accept={accept} onChange={onLoad}/>
+      <div style={{width:38,height:38,borderRadius:9,background:loaded?"rgba(74,222,128,.1)":"var(--bg2)",border:`1px solid ${loaded?"#4ade8055":"var(--border2)"}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:17,flexShrink:0}}>
+        {loaded?"✓":"📂"}
+      </div>
+      <div style={{flex:1,minWidth:0}}>
+        <div style={{fontWeight:600,fontSize:13,marginBottom:2}}>
+          {label} {loaded&&<span style={{fontSize:11,color:"#4ade80",fontWeight:400}}>loaded</span>}
+        </div>
+        <div className="hint" style={{overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{loaded?filename:description}</div>
+      </div>
+    </div>
+  );
+}
+
+/* ── Analyzer ── */
+function Analyzer(){
+  const [scouts,setScouts]=useState([]); // [{name,tiers,filename}]
+  const [result,setResult]=useState(null);
+  const [noteModal,setNoteModal]=useState(null);
+  const ref=useRef();
+
+  function addFiles(e){
+    const files=[...e.target.files];
+    files.forEach(f=>{
+      f.text().then(txt=>{
+        try{
+          const d=JSON.parse(txt);
+          setScouts(prev=>{
+            if(prev.find(s=>s.filename===f.name)) return prev;
+            return[...prev,{name:d.scout||f.name.replace(".json",""),tiers:d.tiers,filename:f.name}];
+          });
+        }catch{alert(`Could not parse ${f.name}`);}
+      });
+    });
+    e.target.value="";
+  }
+
+  function removeScout(filename){setScouts(s=>s.filter(x=>x.filename!==filename));setResult(null);}
+
+  function analyze(){
+    if(!scouts.length) return;
+    // Collect all teams that were explicitly placed in a RANKED tier (not Uncategorized)
+    const teamData={}; // num -> {scores:[], nick, color, notes:[]}
+    scouts.forEach(s=>{
+      RANKED_TIERS.forEach((tier,ti)=>{
+        const arr=s.tiers[tier]||[];
+        arr.forEach((t,idx)=>{
+          if(!teamData[t.num]) teamData[t.num]={scores:[],nick:t.nick||"",color:t.color||null,notes:[]};
+          // score = tier index (0-3) * 100 + position within tier
+          teamData[t.num].scores.push({scout:s.name,tier,rawScore:ti*100+idx});
+          if(t.note) teamData[t.num].notes.push({scout:s.name,note:t.note});
+          if(!teamData[t.num].nick&&t.nick) teamData[t.num].nick=t.nick;
+          if(!teamData[t.num].color&&t.color) teamData[t.num].color=t.color;
+        });
+      });
+    });
+
+    const rows=Object.entries(teamData).map(([num,d])=>{
+      const avg=d.scores.reduce((a,b)=>a+b.rawScore,0)/d.scores.length;
+      // variance only among scouts who ranked this team
+      const variance=d.scores.length>1?d.scores.reduce((a,b)=>a+Math.pow(b.rawScore-avg,2),0)/d.scores.length:0;
+      // consensus tier: majority vote on tier
+      const tierVotes={};
+      d.scores.forEach(s=>{tierVotes[s.tier]=(tierVotes[s.tier]||0)+1;});
+      const consTier=Object.entries(tierVotes).sort((a,b)=>b[1]-a[1])[0][0];
+      return{num,...d,avg,variance,consTier,coverage:d.scores.length};
+    });
+
+    // Sort: primarily by avg score (lower = better), secondary by coverage (more scouts = more reliable)
+    rows.sort((a,b)=>a.avg-b.avg||(b.coverage-a.coverage));
+    setResult(rows);
+  }
+
+  return(
+    <div>
+      {/* Add scouts */}
+      <div className="surface" style={{padding:22,marginBottom:20}}>
+        <div style={{fontWeight:600,fontSize:15,marginBottom:4}}>Combine picklists</div>
+        <div className="muted" style={{fontSize:12,marginBottom:16}}>
+          Add exported JSON picklists from each scout one at a time (or all at once). Only teams explicitly placed in Tier 1–3 or Do Not Pick are included — Uncategorized teams are ignored. Hit Analyze when all scouts are loaded.
+        </div>
+        <div style={{display:"flex",gap:10,alignItems:"flex-start",flexWrap:"wrap"}}>
+          <input type="file" ref={ref} accept=".json" multiple onChange={addFiles}/>
+          <button className="btn" onClick={()=>ref.current.click()}>+ Add scout JSON{scouts.length>0?"s":""}</button>
+          {scouts.length>0&&<button className="btn btn-red" onClick={analyze}>Analyze {scouts.length} scout{scouts.length!==1?"s":""}</button>}
+        </div>
+        {scouts.length>0&&(
+          <div style={{marginTop:14,display:"flex",flexWrap:"wrap",gap:8}}>
+            {scouts.map(s=>(
+              <div key={s.filename} style={{display:"flex",alignItems:"center",gap:7,background:"var(--bg2)",border:"1px solid var(--border2)",borderRadius:8,padding:"5px 10px 5px 12px",fontSize:12}}>
+                <span style={{fontWeight:500}}>{s.name}</span>
+                <button onClick={()=>removeScout(s.filename)} style={{background:"none",border:"none",color:"var(--text3)",cursor:"pointer",fontSize:14,lineHeight:1,padding:"0 2px"}} title="Remove">✕</button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Results */}
+      {result&&<>
+        <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}}>
+          <span style={{fontWeight:600,fontSize:15}}>Consensus picklist</span>
+          <span className="hint">{result.length} teams ranked · {scouts.length} scout{scouts.length!==1?"s":""}</span>
+        </div>
+
+        {/* Legend */}
+        <div style={{display:"flex",gap:12,marginBottom:14,flexWrap:"wrap"}}>
+          {RANKED_TIERS.map(t=>(
+            <div key={t} style={{display:"flex",alignItems:"center",gap:5,fontSize:12}}>
+              <div style={{width:10,height:10,borderRadius:3,background:TMETA[t].color+"44",border:`1px solid ${TMETA[t].color}`}}/>
+              <span style={{color:"var(--text2)"}}>{t}</span>
+            </div>
+          ))}
+          <div style={{display:"flex",alignItems:"center",gap:5,fontSize:12}}>
+            <span className="outlier-badge" style={{padding:"1px 6px"}}>⚠</span>
+            <span style={{color:"var(--text2)"}}>High disagreement between scouts</span>
+          </div>
+        </div>
+
+        <div style={{display:"flex",flexDirection:"column",gap:5}}>
+          {result.map((t,i)=>{
+            const m=TMETA[t.consTier];
+            const isOutlier=t.variance>3000&&t.coverage>1;
+            const col=t.color||fallbackColor(t.num);
+            return(
+              <div key={t.num} style={{display:"flex",alignItems:"center",gap:10,padding:"10px 14px",background:"var(--bg2)",borderRadius:10,border:`1px solid var(--border)`,borderLeft:`3px solid ${m.color}`}}>
+                {/* Rank */}
+                <span style={{color:"var(--text3)",fontSize:12,minWidth:28,textAlign:"right",flexShrink:0}}>#{i+1}</span>
+                {/* Team num */}
+                <TeamNumBadge num={t.num} color={col} style={{flexShrink:0}}/>
+                {/* Name */}
+                <span style={{flex:1,color:"var(--text2)",fontSize:12,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",minWidth:0}}>{t.nick}</span>
+                {/* Per-scout placements */}
+                <div style={{display:"flex",gap:4,flexWrap:"wrap",justifyContent:"flex-end"}}>
+                  {t.scores.map((s,j)=>(
+                    <span key={j} className="stat-chip" style={{fontSize:10,borderColor:TMETA[s.tier].color+"44",color:TMETA[s.tier].color}}>
+                      {s.scout}: {s.tier.replace("Tier ","T")} #{(s.rawScore%100)+1}
+                    </span>
+                  ))}
+                </div>
+                {/* Coverage */}
+                {t.coverage<scouts.length&&(
+                  <span className="hint" style={{whiteSpace:"nowrap",flexShrink:0}} title={`Only ${t.coverage} of ${scouts.length} scouts ranked this team`}>
+                    {t.coverage}/{scouts.length}
+                  </span>
+                )}
+                {/* Consensus tier */}
+                <span style={{color:m.color,fontSize:12,fontWeight:600,whiteSpace:"nowrap",flexShrink:0,minWidth:72,textAlign:"right"}}>{t.consTier}</span>
+                {/* Outlier */}
+                {isOutlier&&<span className="outlier-badge" style={{flexShrink:0}}>⚠ outlier</span>}
+                {/* Notes */}
+                {t.notes.length>0&&(
+                  <button className="btn btn-sm btn-icon" onClick={()=>setNoteModal(t)} title="View scout notes" style={{flexShrink:0,background:"rgba(255,199,44,.1)",borderColor:"rgba(255,199,44,.3)",color:"var(--gold)"}}>✎</button>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </>}
+
+      {/* Notes modal */}
+      {noteModal&&(
+        <div className="modal-overlay" onClick={()=>setNoteModal(null)}>
+          <div className="modal-box" onClick={e=>e.stopPropagation()} style={{maxWidth:400}}>
+            <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:18}}>
+              <TeamNumBadge num={noteModal.num} color={noteModal.color||fallbackColor(noteModal.num)} style={{fontSize:16,padding:"3px 10px"}}/>
+              <span style={{fontWeight:600}}>{noteModal.nick}</span>
+              <button className="btn btn-sm btn-icon" style={{marginLeft:"auto"}} onClick={()=>setNoteModal(null)}>✕</button>
+            </div>
+            <div className="section-label" style={{marginBottom:10}}>Scout notes</div>
+            <div style={{display:"flex",flexDirection:"column",gap:10}}>
+              {noteModal.notes.map((n,i)=>(
+                <div key={i} style={{background:"var(--bg2)",borderRadius:9,padding:"11px 14px",border:"1px solid var(--border2)"}}>
+                  <div style={{fontSize:11,color:"var(--gold)",fontWeight:600,marginBottom:5}}>{n.scout}</div>
+                  <div style={{fontSize:13,color:"var(--text)",lineHeight:1.6}}>{n.note}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ── Main App ── */
+function App(){
+  const [tab,setTab]=useState("builder");
+  const [tiers,setTiers]=useState({"Tier 1":[],"Tier 2":[],"Tier 3":[],"Do Not Pick":[],"Uncategorized":[]});
+  const [view,setView]=useState("list");
+  const [scout,setScout]=useState("");
+  const [dragging,setDragging]=useState(null);
+  const [dzTier,setDzTier]=useState(null);
+  const [doverNum,setDoverNum]=useState(null);
+  const [selTeam,setSelTeam]=useState(null);
+  const [search,setSearch]=useState("");
+  const [sortBy,setSortBy]=useState("num");
+  const [sortDir,setSortDir]=useState("asc");
+  const [teamsFile,setTeamsFile]=useState(null);
+  const [oprFile,setOprFile]=useState(null);
+  const [teamsData,setTeamsData]=useState(null);
+  const [oprData,setOprData]=useState(null);
+  const teamsCsvRef=useRef();
+  const oprCsvRef=useRef();
+  const loadJsonRef=useRef();
+
+  useEffect(()=>{
+    if(!teamsData) return;
+    const merged=teamsData.map(t=>{
+      const o=oprData?.[t.num]||{};
+      return{...t,opr:o.opr||0,auto:o.auto||0,teleop:o.teleop||0,endgame:o.endgame||0,oprData:o};
+    });
+    setTiers(prev=>{
+      const hasTeams=TIERS.some(tier=>(prev[tier]||[]).length>0);
+      if(!hasTeams) return{"Tier 1":[],"Tier 2":[],"Tier 3":[],"Do Not Pick":[],"Uncategorized":merged};
+      const numMap={};merged.forEach(t=>{numMap[t.num]=t;});
+      const next={};
+      TIERS.forEach(tier=>{next[tier]=(prev[tier]||[]).map(t=>numMap[t.num]?{...t,...numMap[t.num],note:t.note||""}:t);});
+      return next;
+    });
+    merged.forEach(async t=>{
+      const c=await getTeamColor(t.num);
+      if(c) setTiers(prev=>{
+        const n={};
+        TIERS.forEach(tier=>{n[tier]=(prev[tier]||[]).map(x=>x.num===t.num?{...x,color:c}:x);});
+        return n;
+      });
+    });
+  },[teamsData,oprData]);
+
+  async function handleTeamsCSV(e){
+    const f=e.target.files[0]; if(!f) return;
+    const t=await f.text();
+    const p=parseTeamsCSV(t);
+    if(!p.length){alert("No teams found. Expected columns: team_number, team_name, city, state_prov, country, robot_image_url");return;}
+    setTeamsFile(f.name);setTeamsData(p);e.target.value="";
+  }
+  async function handleOPRcsv(e){
+    const f=e.target.files[0]; if(!f) return;
+    setOprFile(f.name);setOprData(parseOPRcsv(await f.text()));e.target.value="";
+  }
+  async function handleLoadJSON(e){
+    const f=e.target.files[0]; if(!f) return;
+    const d=JSON.parse(await f.text());
+    if(d.tiers) setTiers(d.tiers);
+    if(d.scout) setScout(d.scout);
+    e.target.value="";
+  }
+
+  function saveNote(num,note){
+    setTiers(prev=>{
+      const n={};
+      TIERS.forEach(tier=>{n[tier]=(prev[tier]||[]).map(t=>t.num===num?{...t,note}:t);});
+      return n;
+    });
+  }
+
+  function handleTeamDS(e,num,fromTier){setDragging({num,fromTier});e.dataTransfer.effectAllowed="move";}
+  function handleTeamDrop(toTier,beforeNum){
+    if(!dragging) return;
+    const{num,fromTier}=dragging;
+    setTiers(prev=>{
+      const n={};TIERS.forEach(t=>{n[t]=[...(prev[t]||[])];});
+      const team=n[fromTier].find(t=>t.num===num); if(!team) return prev;
+      n[fromTier]=n[fromTier].filter(t=>t.num!==num);
+      const idx=n[toTier].findIndex(t=>t.num===beforeNum);
+      if(idx>=0) n[toTier].splice(idx,0,team); else n[toTier].push(team);
+      return n;
+    });
+    setDragging(null);setDoverNum(null);setDzTier(null);
+  }
+  function handleZoneDrop(toTier){
+    if(!dragging) return;
+    const{num,fromTier}=dragging;
+    if(fromTier===toTier){setDragging(null);setDzTier(null);return;}
+    setTiers(prev=>{
+      const n={};TIERS.forEach(t=>{n[t]=[...(prev[t]||[])];});
+      const team=n[fromTier].find(t=>t.num===num); if(!team) return prev;
+      n[fromTier]=n[fromTier].filter(t=>t.num!==num);
+      n[toTier].push(team);
+      return n;
+    });
+    setDragging(null);setDoverNum(null);setDzTier(null);
+  }
+  function clearDE(){setDragging(null);setDoverNum(null);setDzTier(null);}
+
+  function exportJSON(){
+    if(!scout.trim()){alert("Enter your scout name before exporting.");return;}
+    const blob=new Blob([JSON.stringify({scout,timestamp:new Date().toISOString(),tiers},null,2)],{type:"application/json"});
+    const a=document.createElement("a");
+    a.href=URL.createObjectURL(blob);
+    a.download=`picklist_${scout.replace(/\s+/g,"_")}.json`;
+    document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(a.href);
+  }
+
+  function toggleSort(field){
+    if(sortBy===field) setSortDir(d=>d==="asc"?"desc":"asc");
+    else{setSortBy(field);setSortDir("desc");}
+  }
+
+  const loaded=!!teamsData;
+  const totalTeams=TIERS.reduce((a,t)=>a+(tiers[t]||[]).length,0);
+  const categorized=totalTeams-(tiers["Uncategorized"]||[]).length;
+  const q=search.toLowerCase();
+
+  function displayTeams(tier){
+    let arr=tiers[tier]||[];
+    if(tier==="Uncategorized"&&q) arr=arr.filter(t=>t.num.includes(q)||t.nick.toLowerCase().includes(q));
+    return sortTeams(arr,sortBy,sortDir);
+  }
+
+  return(
+    <div style={{minHeight:"100vh",background:"var(--bg0)"}}>
+      {/* Header */}
+      <div style={{borderBottom:"1px solid var(--border)",background:"rgba(8,8,15,.97)",position:"sticky",top:0,zIndex:50,backdropFilter:"blur(20px)"}}>
+        <div style={{maxWidth:1180,margin:"0 auto",padding:"12px 24px",display:"flex",alignItems:"center",gap:12,flexWrap:"wrap"}}>
+          <div style={{display:"flex",alignItems:"center",gap:10,flexShrink:0}}>
+            <div style={{width:36,height:36,borderRadius:10,background:"linear-gradient(135deg,#C8102E,#FFC72C)",display:"flex",alignItems:"center",justifyContent:"center",fontWeight:900,fontSize:13,color:"#08080f"}}>KK</div>
+            <div>
+              <div style={{fontWeight:700,fontSize:14,lineHeight:1.2}}>KnightKrawler</div>
+              <div style={{fontSize:10,color:"var(--text3)",letterSpacing:".07em"}}>PICKLIST · TEAM 2052</div>
+            </div>
+          </div>
+          <div className="tabs" style={{marginLeft:8}}>
+            {["builder","analyzer"].map(t=>(
+              <button key={t} className={`tab-btn${tab===t?" active":""}`} onClick={()=>setTab(t)}>
+                {t==="builder"?"🗂 Builder":"📊 Analyzer"}
+              </button>
+            ))}
+          </div>
+          <div style={{flex:1}}/>
+          {loaded&&<span style={{fontSize:12,color:"#4ade80",whiteSpace:"nowrap"}}>{categorized}/{totalTeams} categorized</span>}
+          <input type="text" placeholder="Your name…" value={scout} onChange={e=>setScout(e.target.value)} style={{width:124}}/>
+          <input type="file" ref={teamsCsvRef} accept=".csv" onChange={handleTeamsCSV}/>
+          <input type="file" ref={oprCsvRef} accept=".csv" onChange={handleOPRcsv}/>
+          <input type="file" ref={loadJsonRef} accept=".json" onChange={handleLoadJSON}/>
+          <button className="btn btn-sm" onClick={()=>loadJsonRef.current.click()}>⬆ Load picklist</button>
+          <button className="btn btn-sm btn-gold" onClick={exportJSON}>⬇ Export picklist</button>
+        </div>
+      </div>
+
+      <div style={{maxWidth:1180,margin:"0 auto",padding:"22px 24px 60px"}}>
+        {tab==="builder"&&<>
+          {/* Import panel */}
+          <div className="surface" style={{padding:18,marginBottom:18}}>
+            <div style={{fontWeight:600,fontSize:13,marginBottom:3}}>Data Import</div>
+            <div className="muted" style={{fontSize:12,marginBottom:12}}>Teams CSV is required to populate the picklist. The OPR CSV is optional — it adds stat chips and the full breakdown in the team detail view.</div>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
+              <ImportFileCard label="Teams CSV" description="TBA → Event → Teams export. Provides team numbers and names." accept=".csv" onLoad={handleTeamsCSV} loaded={!!teamsFile} filename={teamsFile}/>
+              <ImportFileCard label="Component OPRs CSV" description="TBA → Event → OPR export. Provides OPR, Auto, Teleop, and Endgame scores." accept=".csv" onLoad={handleOPRcsv} loaded={!!oprFile} filename={oprFile}/>
+            </div>
+          </div>
+
+          {/* Sort/filter bar */}
+          {loaded&&(
+            <div style={{display:"flex",gap:8,marginBottom:14,flexWrap:"wrap",alignItems:"center"}}>
+              <input type="search" placeholder="Search by # or name…" value={search} onChange={e=>setSearch(e.target.value)} style={{width:200}}/>
+              <span className="hint">Sort:</span>
+              {[["num","#"],["opr","OPR"],["auto","Auto"],["teleop","Teleop"],["endgame","Endgame"],["nick","Name"]].map(([k,l])=>(
+                <button key={k} className="btn btn-sm" onClick={()=>toggleSort(k)}
+                  style={sortBy===k?{borderColor:"var(--gold)",color:"var(--gold)"}:{}}>
+                  {l}{sortBy===k?(sortDir==="asc"?" ↑":" ↓"):""}
+                </button>
+              ))}
+              <div style={{flex:1}}/>
+              <div style={{display:"flex",gap:3,background:"var(--bg2)",border:"1px solid var(--border)",borderRadius:9,padding:3}}>
+                {["list","tile"].map(v=>(
+                  <button key={v} onClick={()=>setView(v)}
+                    style={{padding:"5px 13px",borderRadius:7,border:"none",background:view===v?"var(--red)":"transparent",color:view===v?"#fff":"var(--text2)",fontSize:12,fontWeight:500,cursor:"pointer",transition:"all .15s"}}>
+                    {v==="list"?"☰ List":"⊞ Tile"}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Tier grid */}
+          {loaded?(
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:18,alignItems:"start"}}>
+              <div>{TIERS.filter(t=>t!=="Uncategorized").map(tier=>(
+                <TierLane key={tier} tier={tier} teams={displayTeams(tier)} view={view}
+                  isDropZone={dzTier===tier}
+                  onZDO={t=>setDzTier(t)} onZDrop={handleZoneDrop} onZDL={()=>setDzTier(null)}
+                  onDS={handleTeamDS} onDO={n=>setDoverNum(n)}
+                  onDrop={handleTeamDrop} onDE={clearDE}
+                  draggingNum={dragging?.num} doverNum={doverNum}
+                  onTeamClick={setSelTeam}/>
+              ))}</div>
+              <div>
+                <TierLane tier="Uncategorized" teams={displayTeams("Uncategorized")} view={view}
+                  isDropZone={dzTier==="Uncategorized"}
+                  onZDO={t=>setDzTier(t)} onZDrop={handleZoneDrop} onZDL={()=>setDzTier(null)}
+                  onDS={handleTeamDS} onDO={n=>setDoverNum(n)}
+                  onDrop={handleTeamDrop} onDE={clearDE}
+                  draggingNum={dragging?.num} doverNum={doverNum}
+                  onTeamClick={setSelTeam}/>
+              </div>
+            </div>
+          ):(
+            <div className="surface" style={{padding:52,textAlign:"center"}}>
+              <div style={{fontSize:42,marginBottom:12}}>🤖</div>
+              <div style={{fontWeight:700,fontSize:18,marginBottom:8}}>Import a Teams CSV to get started</div>
+              <div className="muted" style={{fontSize:13,marginBottom:20,maxWidth:380,margin:"0 auto 20px"}}>Export your event's team list from The Blue Alliance, then click the Teams CSV card above.</div>
+              <button className="btn btn-red" onClick={()=>teamsCsvRef.current.click()}>⬆ Import Teams CSV</button>
+            </div>
+          )}
+        </>}
+
+        {tab==="analyzer"&&<Analyzer/>}
+      </div>
+
+      {selTeam&&<TeamModal t={selTeam} onClose={()=>setSelTeam(null)} onSaveNote={saveNote}/>}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>
